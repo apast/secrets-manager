@@ -1443,27 +1443,31 @@ class SecretsManager:
 
 
 class KSMCache:
-    # Allow the directory that will contain the cache to be set with environment variables. If not set, the
-    # cache file will be create in the current working directory.
-    kms_cache_file_name = os.path.join(os.environ.get("KSM_CACHE_DIR", ""), 'ksm_cache.bin')
+    DEFAULT_CACHE_FILE_NAME = 'ksm_cache.bin'
+
+    @staticmethod
+    def get_cache_file_name():
+        """
+        Allow the directory that will contain the cache to be set with environment variables.
+        If not set, the cache file will be create in the current working directory.
+        """
+        return os.path.join(os.environ.get("KSM_CACHE_DIR", ""), KSMCache.DEFAULT_CACHE_FILE_NAME)
 
     @staticmethod
     def save_cache(data):
-        cache_file = open(KSMCache.kms_cache_file_name, 'wb')
-        cache_file.write(data)
-        cache_file.close()
+        with open(KSMCache.get_cache_file_name(), 'wb') as cache_file:
+            cache_file.write(data)
 
     @staticmethod
     def get_cached_data():
-        cache_file = open(KSMCache.kms_cache_file_name, 'rb')
-        cache_data = cache_file.read()
-        cache_file.close()
+        with open(KSMCache.get_cache_file_name(), 'rb') as cache_file:
+            cache_data = cache_file.read()
         return cache_data
 
     @staticmethod
     def remove_cache_file():
-        if os.path.exists(KSMCache.kms_cache_file_name) is True:
-            os.unlink(KSMCache.kms_cache_file_name)
+        if os.path.exists(KSMCache.get_cache_file_name()) is True:
+            os.unlink(KSMCache.get_cache_file_name())
 
     @staticmethod
     def caching_post_function(url, transmission_key, encrypted_payload_and_signature, verify_ssl_certs=True):
